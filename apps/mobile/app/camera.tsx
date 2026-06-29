@@ -42,8 +42,9 @@ export default function CameraScreen() {
         xhr.send({ uri: pendingPhoto, type: 'image/jpeg', name: 'photo.jpg' } as any);
       });
       photoUrl = data.photo_url;
-    } catch {
+    } catch (e: any) {
       setUploading(false);
+      console.log('UPLOAD ERROR:', e?.response?.data?.detail ?? e?.message ?? String(e), e);
       Alert.alert('Upload failed', 'Could not upload photo. Try again.');
       return;
     }
