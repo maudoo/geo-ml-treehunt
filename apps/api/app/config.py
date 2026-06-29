@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 1440 #if someone steals a token, it only works for 24 hours maximum.
 
 
+    # Storage
+    gcs_bucket: str = "geo-ml-treehunt-photos"
+
     # Game
     points_per_quest: int = 100 
 

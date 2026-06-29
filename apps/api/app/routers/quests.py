@@ -1,9 +1,12 @@
 import uuid
+import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from google.cloud import storage
 from app.database import get_db
 from app.core.dependencies import get_current_user
 from app.schemas.quest import QuestDetail, QuestSubmission, LeaderboardPlayer
+from app.config import settings
 from app.services.quest_service import (
     assign_quest,
     get_active_quest,
@@ -110,3 +113,20 @@ async def leaderboard(
     db: AsyncSession = Depends(get_db),
 ):
     return await get_leaderboard(db)
+
+
+@router.post("/upload-url")
+async def get_upload_url(
+    user_id: str = Depends(get_current_user),
+):
+    client = storage.Client()
+    bucket = client.bucket(settings.gcs_bucket)
+    blob = bucket.blob(f"photos/{user_id}/{uuid.uuid4()}.jpg")
+    signed_url = blob.generate_signed_url(
+        version="v4",
+        expiration=datetime.timedelta(minutes=15),
+        method="PUT",
+        content_type="image/jpeg",
+    )
+    public_url = f"https://storage.googleapis.com/{settings.gcs_bucket}/{blob.name}"
+    return {"upload_url": signed_url, "public_url": public_url}

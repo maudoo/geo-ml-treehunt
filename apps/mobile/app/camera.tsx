@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import useQuestStore from '../src/store/questStore';
+import client from '../src/api/client';
 
 export default function CameraScreen() {
   const { activeQuest, submitQuest, fetchAllQuests, pendingPhoto, setPendingPhoto } = useQuestStore();
@@ -29,10 +30,30 @@ export default function CameraScreen() {
       return;
     }
 
+    // Get signed upload URL from backend
+    let photoUrl: string;
+    try {
+      const urlRes = await client.post('/quests/upload-url');
+      const { upload_url, public_url } = urlRes.data;
+
+      // Upload photo directly to GCS
+      const photoBlob = await fetch(pendingPhoto).then(r => r.blob());
+      await fetch(upload_url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'image/jpeg' },
+        body: photoBlob,
+      });
+      photoUrl = public_url;
+    } catch {
+      setUploading(false);
+      Alert.alert('Upload failed', 'Could not upload photo. Try again.');
+      return;
+    }
+
     const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
     const result = await submitQuest(
       activeQuest.id,
-      pendingPhoto,
+      photoUrl,
       location.coords.latitude,
       location.coords.longitude,
     );
