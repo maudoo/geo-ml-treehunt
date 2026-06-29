@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: alphahawk_db
+    environment:
+      POSTGRES_DB: alphawood
+      POSTGRES_USER: alphahawk_user
+      POSTGRES_PASSWORD: alphahawk_pass
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    volumes:
+      - alphahawk_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alphahawk_user -d alphawood"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: alphahawk_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@alphahawk.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - alphahawk_pgadmin:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  alphahawk_pgdata:
+  alphahawk_pgadmin:
