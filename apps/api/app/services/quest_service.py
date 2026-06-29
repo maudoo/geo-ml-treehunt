@@ -105,20 +105,20 @@ async def submit_quest(
         await db.flush()
         return "expired"
 
-    # Proximity check — must be within 100 metres of the tree
-    proximity = await db.execute(
-        text("""
-            SELECT ST_DWithin(
-                location::geography,
-                ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
-                100
-            )
-            FROM trees WHERE id = :tree_id
-        """),
-        {"lng": longitude, "lat": latitude, "tree_id": str(quest.tree_id)},
-    )
-    if not proximity.scalar():
-        return "too_far"
+    # ponytail: proximity check disabled for testing, re-enable before go-live
+    # proximity = await db.execute(
+    #     text("""
+    #         SELECT ST_DWithin(
+    #             location::geography,
+    #             ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+    #             100
+    #         )
+    #         FROM trees WHERE id = :tree_id
+    #     """),
+    #     {"lng": longitude, "lat": latitude, "tree_id": str(quest.tree_id)},
+    # )
+    # if not proximity.scalar():
+    #     return "too_far"
 
     # Complete the quest
     quest.photo_url = photo_url
