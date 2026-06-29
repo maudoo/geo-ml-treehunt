@@ -33,11 +33,13 @@ export default function CameraScreen() {
     let photoUrl: string;
     try {
       const { data } = await client.post('/quests/upload-url', {});
-      const imageBlob = await fetch(pendingPhoto).then(r => r.blob());
-      await fetch(data.upload_url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'image/jpeg' },
-        body: imageBlob,
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', data.upload_url);
+        xhr.setRequestHeader('Content-Type', 'image/jpeg');
+        xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(`GCS ${xhr.status}`)));
+        xhr.onerror = reject;
+        xhr.send({ uri: pendingPhoto, type: 'image/jpeg', name: 'photo.jpg' } as any);
       });
       photoUrl = data.photo_url;
     } catch {
