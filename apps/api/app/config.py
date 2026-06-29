@@ -14,6 +14,7 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str
+    database_ssl: bool = False
 
     #Auth
     jwt_secret_key: str

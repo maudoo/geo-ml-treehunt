@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = 'https://stubbed-blunt-retired.ngrok-free.dev';
+const API_URL = 'https://geo-ml-treehunt-api-858416453237.us-east1.run.app';
 const client = axios.create({
   baseURL: API_URL,
   headers: {
