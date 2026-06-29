@@ -1,5 +1,4 @@
 import uuid
-import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from google.cloud import storage
@@ -119,14 +118,25 @@ async def leaderboard(
 async def get_upload_url(
     user_id: str = Depends(get_current_user),
 ):
-    client = storage.Client()
-    bucket = client.bucket(settings.gcs_bucket)
-    blob = bucket.blob(f"photos/{user_id}/{uuid.uuid4()}.jpg")
+    import google.auth
+    import google.auth.transport.requests
+    from datetime import timedelta
+
+    credentials, _ = google.auth.default()
+    credentials.refresh(google.auth.transport.requests.Request())
+
+    gcs = storage.Client(credentials=credentials)
+    blob_name = f"photos/{user_id}/{uuid.uuid4()}.jpg"
+    bucket = gcs.bucket(settings.gcs_bucket)
+    blob = bucket.blob(blob_name)
+
     signed_url = blob.generate_signed_url(
-        version="v4",
-        expiration=datetime.timedelta(minutes=15),
+        expiration=timedelta(minutes=15),
         method="PUT",
         content_type="image/jpeg",
+        version="v4",
+        service_account_email=credentials.service_account_email,
+        access_token=credentials.token,
     )
-    public_url = f"https://storage.googleapis.com/{settings.gcs_bucket}/{blob.name}"
-    return {"upload_url": signed_url, "public_url": public_url}
+    public_url = f"https://storage.googleapis.com/{settings.gcs_bucket}/{blob_name}"
+    return {"upload_url": signed_url, "photo_url": public_url}

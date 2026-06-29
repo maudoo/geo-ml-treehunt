@@ -30,20 +30,16 @@ export default function CameraScreen() {
       return;
     }
 
-    // Get signed upload URL from backend
     let photoUrl: string;
     try {
-      const urlRes = await client.post('/quests/upload-url');
-      const { upload_url, public_url } = urlRes.data;
-
-      // Upload photo directly to GCS
-      const photoBlob = await fetch(pendingPhoto).then(r => r.blob());
-      await fetch(upload_url, {
+      const { data } = await client.post('/quests/upload-url', {});
+      const imageBlob = await fetch(pendingPhoto).then(r => r.blob());
+      await fetch(data.upload_url, {
         method: 'PUT',
         headers: { 'Content-Type': 'image/jpeg' },
-        body: photoBlob,
+        body: imageBlob,
       });
-      photoUrl = public_url;
+      photoUrl = data.photo_url;
     } catch {
       setUploading(false);
       Alert.alert('Upload failed', 'Could not upload photo. Try again.');
