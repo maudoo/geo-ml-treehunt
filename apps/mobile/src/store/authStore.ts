@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
+import { getToken, setToken, removeToken } from '../storage';
 import client from '../api/client';
 
 interface User {
@@ -29,7 +29,7 @@ const useAuthStore = create<AuthState>((set) => ({
     try {
       const response = await client.post('/auth/login', { email, password });
       const token = response.data.access_token;
-      await SecureStore.setItemAsync('token', token);
+      await setToken(token);
       set({ token, isLoading: false });
       return true;
     } catch {
@@ -43,7 +43,7 @@ const useAuthStore = create<AuthState>((set) => ({
   try {
     const response = await client.post('/auth/register', { email, display_name, password });
     const token = response.data.access_token;
-    await SecureStore.setItemAsync('token', token);
+    await setToken(token);
     set({ token, isLoading: false });
     return true;
   } catch (error: any) {
@@ -56,13 +56,13 @@ const useAuthStore = create<AuthState>((set) => ({
 },
 
   logout: async () => {
-    await SecureStore.deleteItemAsync('token');
+    await removeToken();
     set({ token: null, user: null });
   },
 
   loadToken: async () => {
     try {
-      const token = await SecureStore.getItemAsync('token');
+      const token = await getToken();
       set({ token });
     } catch {
       set({ token: null });

@@ -5,11 +5,12 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import useAuthStore from '../../src/store/authStore';
+import { colors } from '../../src/theme';
+import PrimaryButton from '../../src/components/PrimaryButton';
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
@@ -44,7 +45,7 @@ export default function RegisterScreen() {
         style={styles.input}
         placeholder="Display Name"
         value={displayName}
-        placeholderTextColor="#999"
+        placeholderTextColor={colors.placeholder}
 
         onChangeText={setDisplayName}
         autoCapitalize="words"
@@ -53,7 +54,7 @@ export default function RegisterScreen() {
       <TextInput
         style={styles.input}
         placeholder="Email"
-        placeholderTextColor="#999"
+        placeholderTextColor={colors.placeholder}
 
         value={email}
         onChangeText={setEmail}
@@ -65,22 +66,12 @@ export default function RegisterScreen() {
         style={styles.input}
         placeholder="Password"
         value={password}
-        placeholderTextColor="#999"
+        placeholderTextColor={colors.placeholder}
         onChangeText={setPassword}
         secureTextEntry
       />
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleRegister}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <ActivityIndicator color="white" />
-        ) : (
-          <Text style={styles.buttonText}>Create Account</Text>
-        )}
-      </TouchableOpacity>
+      <PrimaryButton title="Create Account" onPress={handleRegister} loading={isLoading} style={{ marginBottom: 16 }} />
 
       <TouchableOpacity onPress={() => router.back()}>
         <Text style={styles.link}>Already have an account? Login</Text>
@@ -94,44 +85,32 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 24,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   title: {
     fontSize: 36,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 8,
-    color: '#2d6a4f',
+    color: colors.primary,
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 48,
-    color: '#666',
+    color: colors.textSubtle,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.inputBorder,
     borderRadius: 8,
     padding: 14,
     marginBottom: 16,
     fontSize: 16,
   },
-  button: {
-    backgroundColor: '#2d6a4f',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
   link: {
     textAlign: 'center',
-    color: '#2d6a4f',
+    color: colors.primary,
     fontSize: 14,
   },
 });

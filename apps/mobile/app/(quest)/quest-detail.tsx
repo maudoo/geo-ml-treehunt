@@ -6,7 +6,9 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import useQuestStore from '../src/store/questStore';
+import useQuestStore from '../../src/store/questStore';
+import { colors } from '../../src/theme';
+import Card from '../../src/components/Card';
 
 export default function QuestDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,11 +46,11 @@ export default function QuestDetailScreen() {
       <Text style={styles.treeName}>{quest.tree.common_name}</Text>
       <Text style={styles.treeScientific}>{quest.tree.scientific_name}</Text>
 
-      <View style={styles.metaCard}>
+      <Card style={styles.metaCard}>
         <Row label="Assigned" value={assignedDate} />
         {completedDate && <Row label="Completed" value={completedDate} />}
         <Row label="Coordinates" value={`${quest.tree.latitude.toFixed(5)}, ${quest.tree.longitude.toFixed(5)}`} />
-      </View>
+      </Card>
 
       {quest.photo_url ? (
         <View>
@@ -72,7 +74,7 @@ function Row({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   content: {
     padding: 24,
@@ -86,7 +88,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: '#666',
+    color: colors.textSubtle,
   },
   statusRow: {
     flexDirection: 'row',
@@ -100,10 +102,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   badgeActive: {
-    backgroundColor: '#2d6a4f',
+    backgroundColor: colors.primary,
   },
   badgeDone: {
-    backgroundColor: '#adb5bd',
+    backgroundColor: colors.disabled,
   },
   badgeText: {
     color: 'white',
@@ -113,12 +115,12 @@ const styles = StyleSheet.create({
   xp: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2d6a4f',
+    color: colors.primary,
   },
   questNumber: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#888',
+    color: colors.textFaint,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 6,
@@ -126,21 +128,18 @@ const styles = StyleSheet.create({
   treeName: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#1b4332',
+    color: colors.primaryDark,
     marginBottom: 4,
   },
   treeScientific: {
     fontSize: 16,
     fontStyle: 'italic',
-    color: '#555',
+    color: colors.textMuted,
     marginBottom: 24,
   },
   metaCard: {
-    backgroundColor: '#f0faf4',
     borderRadius: 12,
     padding: 16,
-    borderWidth: 1,
-    borderColor: '#b7e4c7',
     marginBottom: 24,
   },
   row: {
@@ -148,15 +147,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#d8f3dc',
+    borderBottomColor: colors.successBg,
   },
   rowLabel: {
     fontSize: 14,
-    color: '#888',
+    color: colors.textFaint,
   },
   rowValue: {
     fontSize: 14,
-    color: '#1b4332',
+    color: colors.primaryDark,
     fontWeight: '500',
     flexShrink: 1,
     textAlign: 'right',
@@ -165,7 +164,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#888',
+    color: colors.textFaint,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 12,

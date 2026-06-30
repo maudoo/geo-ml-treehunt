@@ -32,3 +32,6 @@ npm-debug.log*
 
 # Expo / EAS
 .easignore
+
+# Neon CLI project markers
+.neon

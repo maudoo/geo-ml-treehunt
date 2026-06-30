@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   View,
   Text,
+  Image,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
@@ -9,11 +10,21 @@ import {
 import { useRouter } from 'expo-router';
 import client from '../../src/api/client';
 import useAuthStore from '../../src/store/authStore';
+import { colors } from '../../src/theme';
+import Card from '../../src/components/Card';
+import { LEVEL_AVATARS } from '../../src/leveling';
 
 interface ProfileData {
   display_name: string;
   email: string;
   xp: number;
+  rank: number;
+  total_players: number;
+  level: number;
+  is_max_level: boolean;
+  xp_into_level: number;
+  xp_for_level: number;
+  progress: number;
 }
 
 export default function ProfileScreen() {
@@ -44,7 +55,7 @@ export default function ProfileScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2d6a4f" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -54,13 +65,31 @@ export default function ProfileScreen() {
       <Text style={styles.heading}>👤 Profile</Text>
 
       {profile && (
-        <View style={styles.card}>
-          <Text style={styles.name}>{profile.display_name}</Text>
-          <Text style={styles.email}>{profile.email}</Text>
-          <View style={styles.xpBadge}>
-            <Text style={styles.xpText}>{profile.xp} XP</Text>
+        <>
+          <View style={styles.avatarSection}>
+            <Image source={LEVEL_AVATARS[profile.level]} style={styles.avatar} />
+            <Text style={styles.name}>{profile.display_name}</Text>
+            <Text style={styles.email}>{profile.email}</Text>
           </View>
-        </View>
+
+          <Card style={styles.statCard}>
+            <View style={styles.levelBadge}>
+              <Text style={styles.levelBadgeText}>Level {profile.level}</Text>
+            </View>
+            <Text style={styles.rank}>#{profile.rank} of {profile.total_players} players</Text>
+          </Card>
+
+          <Card style={styles.statCard}>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: `${Math.round(profile.progress * 100)}%` }]} />
+            </View>
+            <Text style={styles.progressLabel}>
+              {profile.is_max_level
+                ? `Max level reached — ${profile.xp} XP`
+                : `${profile.xp_into_level} / ${profile.xp_for_level} XP to Level ${profile.level + 1}`}
+            </Text>
+          </Card>
+        </>
       )}
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -73,7 +102,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     padding: 24,
     paddingTop: 60,
   },
@@ -85,49 +114,75 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1b4332',
+    color: colors.primaryDark,
     marginBottom: 24,
   },
-  card: {
-    backgroundColor: '#f0faf4',
-    borderRadius: 16,
-    padding: 24,
+  avatarSection: {
     alignItems: 'center',
-    marginBottom: 32,
-    borderWidth: 1,
-    borderColor: '#b7e4c7',
+    marginBottom: 20,
+  },
+  avatar: {
+    width: 140,
+    height: 140,
+    marginBottom: 12,
+    resizeMode: 'contain',
   },
   name: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#1b4332',
+    color: colors.primaryDark,
     marginBottom: 4,
   },
   email: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 13,
+    color: colors.textSubtle,
+  },
+  statCard: {
+    alignItems: 'center',
     marginBottom: 16,
   },
-  xpBadge: {
-    backgroundColor: '#2d6a4f',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
+  levelBadge: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     borderRadius: 99,
+    marginBottom: 8,
   },
-  xpText: {
+  levelBadgeText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
+  },
+  rank: {
+    fontSize: 14,
+    color: colors.textSubtle,
+  },
+  progressTrack: {
+    width: '100%',
+    height: 12,
+    backgroundColor: colors.cardBorder,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+  },
+  progressLabel: {
+    fontSize: 12,
+    color: colors.textFaint,
+    marginTop: 8,
   },
   logoutButton: {
     borderWidth: 1,
-    borderColor: '#ff4444',
+    borderColor: colors.danger,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
   },
   logoutText: {
-    color: '#ff4444',
+    color: colors.danger,
     fontSize: 16,
     fontWeight: '600',
   },

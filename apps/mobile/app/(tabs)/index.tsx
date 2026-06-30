@@ -11,6 +11,9 @@ import {
 import useQuestStore from '../../src/store/questStore';
 import useAuthStore from '../../src/store/authStore';
 import { useCountdown } from '../../src/hooks/useCountdown';
+import { colors } from '../../src/theme';
+import PrimaryButton from '../../src/components/PrimaryButton';
+import Card from '../../src/components/Card';
 
 export default function HomeScreen() {
   const { activeQuest, isLoading, fetchQuest, assignQuest, dismissQuest, cancelQuest } = useQuestStore();
@@ -66,7 +69,7 @@ export default function HomeScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2d6a4f" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -81,7 +84,7 @@ export default function HomeScreen() {
       </View>
 
       {activeQuest ? (
-        <View style={[styles.questCard, expired && styles.questCardExpired]}>
+        <Card style={expired && styles.questCardExpired}>
           <View style={styles.questTitleRow}>
             <Text style={[styles.questTitle, expired && styles.questTitleExpired]}>
               {expired ? 'Quest Expired' : 'Active Quest'}
@@ -101,22 +104,18 @@ export default function HomeScreen() {
             </TouchableOpacity>
           ) : (
             <View>
-              <TouchableOpacity style={styles.button} onPress={() => router.push('/find-tree')}>
-                <Text style={styles.buttonText}>Go Find It →</Text>
-              </TouchableOpacity>
+              <PrimaryButton title="Go Find It →" onPress={() => router.push('/find-tree')} style={{ marginBottom: 12 }} />
               <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
                 <Text style={styles.cancelText}>Cancel Quest</Text>
               </TouchableOpacity>
             </View>
           )}
-        </View>
+        </Card>
       ) : (
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>No active quest</Text>
           <Text style={styles.emptySubtext}>Ready to find a tree?</Text>
-          <TouchableOpacity style={styles.button} onPress={handleAssign}>
-            <Text style={styles.buttonText}>Find a Quest 🌿</Text>
-          </TouchableOpacity>
+          <PrimaryButton title="Find a Quest 🌿" onPress={handleAssign} style={{ marginBottom: 12 }} />
         </View>
       )}
     </View>
@@ -124,36 +123,27 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 24, paddingTop: 60 },
+  container: { flex: 1, backgroundColor: colors.white, padding: 24, paddingTop: 60 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#2d6a4f' },
-  logout: { color: '#999', fontSize: 14 },
-  questCard: {
-    backgroundColor: '#f0faf4',
-    borderRadius: 16,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: '#b7e4c7',
-  },
+  title: { fontSize: 24, fontWeight: 'bold', color: colors.primary },
+  logout: { color: colors.placeholder, fontSize: 14 },
   questCardExpired: {
-    backgroundColor: '#fff8f0',
-    borderColor: '#ff9800',
+    backgroundColor: colors.warningBg,
+    borderColor: colors.warning,
   },
   questTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  questTitle: { fontSize: 12, fontWeight: '600', color: '#2d6a4f', textTransform: 'uppercase', letterSpacing: 1 },
-  questTitleExpired: { color: '#ff9800' },
-  timer: { fontSize: 14, fontWeight: 'bold', color: '#2d6a4f', fontVariant: ['tabular-nums'] },
-  timerExpired: { color: '#ff9800' },
-  treeName: { fontSize: 28, fontWeight: 'bold', color: '#1b4332', marginBottom: 4 },
-  treeScientific: { fontSize: 16, color: '#666', fontStyle: 'italic', marginBottom: 24 },
-  button: { backgroundColor: '#2d6a4f', padding: 16, borderRadius: 8, alignItems: 'center', marginBottom: 12 },
-  cancelButton: { padding: 16, borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: '#ccc' },
-  cancelText: { color: '#999', fontSize: 16, fontWeight: '600' },
-  buttonText: { color: 'white', fontSize: 16, fontWeight: '600' },
-  dismissButton: { borderWidth: 1, borderColor: '#ff9800', padding: 16, borderRadius: 8, alignItems: 'center' },
-  dismissText: { color: '#ff9800', fontSize: 16, fontWeight: '600' },
+  questTitle: { fontSize: 12, fontWeight: '600', color: colors.primary, textTransform: 'uppercase', letterSpacing: 1 },
+  questTitleExpired: { color: colors.warning },
+  timer: { fontSize: 14, fontWeight: 'bold', color: colors.primary, fontVariant: ['tabular-nums'] },
+  timerExpired: { color: colors.warning },
+  treeName: { fontSize: 28, fontWeight: 'bold', color: colors.primaryDark, marginBottom: 4 },
+  treeScientific: { fontSize: 16, color: colors.textSubtle, fontStyle: 'italic', marginBottom: 24 },
+  cancelButton: { padding: 16, borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: colors.borderLight },
+  cancelText: { color: colors.placeholder, fontSize: 16, fontWeight: '600' },
+  dismissButton: { borderWidth: 1, borderColor: colors.warning, padding: 16, borderRadius: 8, alignItems: 'center' },
+  dismissText: { color: colors.warning, fontSize: 16, fontWeight: '600' },
   emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyText: { fontSize: 24, fontWeight: 'bold', color: '#1b4332', marginBottom: 8 },
-  emptySubtext: { fontSize: 16, color: '#666', marginBottom: 32 },
+  emptyText: { fontSize: 24, fontWeight: 'bold', color: colors.primaryDark, marginBottom: 8 },
+  emptySubtext: { fontSize: 16, color: colors.textSubtle, marginBottom: 32 },
 });

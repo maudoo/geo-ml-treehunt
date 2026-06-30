@@ -4,15 +4,17 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
   Alert,
   Image,
   ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
-import useQuestStore from '../src/store/questStore';
-import client from '../src/api/client';
+import useQuestStore from '../../src/store/questStore';
+import client from '../../src/api/client';
+import { colors } from '../../src/theme';
+import PrimaryButton from '../../src/components/PrimaryButton';
+import Card from '../../src/components/Card';
 
 export default function CameraScreen() {
   const { activeQuest, submitQuest, fetchAllQuests, pendingPhoto, setPendingPhoto } = useQuestStore();
@@ -86,22 +88,16 @@ export default function CameraScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.heading}>Submit Photo</Text>
 
-      <View style={styles.treeCard}>
+      <Card style={styles.treeCard}>
         <Text style={styles.treeLabel}>Current Quest</Text>
         <Text style={styles.treeName}>{activeQuest.tree.common_name}</Text>
         <Text style={styles.treeScientific}>{activeQuest.tree.scientific_name}</Text>
-      </View>
+      </Card>
 
       {pendingPhoto ? (
         <View>
           <Image source={{ uri: pendingPhoto }} style={styles.preview} />
-          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={uploading}>
-            {uploading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text style={styles.buttonText}>Submit Photo ✓</Text>
-            )}
-          </TouchableOpacity>
+          <PrimaryButton title="Submit Photo ✓" onPress={handleSubmit} loading={uploading} style={{ marginBottom: 12 }} />
           <TouchableOpacity
             style={styles.secondaryButton}
             onPress={() => { setPendingPhoto(null); router.back(); }}
@@ -122,7 +118,7 @@ export default function CameraScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
   },
   content: {
     padding: 24,
@@ -138,31 +134,27 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1b4332',
+    color: colors.primaryDark,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSubtle,
     textAlign: 'center',
   },
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1b4332',
+    color: colors.primaryDark,
     marginBottom: 24,
   },
   treeCard: {
-    backgroundColor: '#f0faf4',
-    borderRadius: 16,
     padding: 20,
     marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#b7e4c7',
   },
   treeLabel: {
     fontSize: 12,
-    color: '#888',
+    color: colors.textFaint,
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 4,
@@ -170,13 +162,13 @@ const styles = StyleSheet.create({
   treeName: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1b4332',
+    color: colors.primaryDark,
     marginBottom: 2,
   },
   treeScientific: {
     fontSize: 14,
     fontStyle: 'italic',
-    color: '#555',
+    color: colors.textMuted,
   },
   preview: {
     width: '100%',
@@ -184,27 +176,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 16,
   },
-  button: {
-    backgroundColor: '#2d6a4f',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
   secondaryButton: {
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#2d6a4f',
+    borderColor: colors.primary,
   },
   secondaryText: {
-    color: '#2d6a4f',
+    color: colors.primary,
     fontSize: 16,
     fontWeight: '600',
   },

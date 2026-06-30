@@ -8,9 +8,12 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import useQuestStore from '../src/store/questStore';
-import { useCountdown } from '../src/hooks/useCountdown';
-import MapView, { Marker } from 'react-native-maps';
+import useQuestStore from '../../src/store/questStore';
+import { useCountdown } from '../../src/hooks/useCountdown';
+import { colors } from '../../src/theme';
+import PrimaryButton from '../../src/components/PrimaryButton';
+import Card from '../../src/components/Card';
+import TreeMap from '../../src/components/TreeMap';
 
 export default function FindTreeScreen() {
   const { activeQuest, setPendingPhoto, dismissQuest, cancelQuest } = useQuestStore();
@@ -25,7 +28,7 @@ export default function FindTreeScreen() {
       return;
     }
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       quality: 0.8,
     });
     if (!result.canceled) {
@@ -83,28 +86,17 @@ export default function FindTreeScreen() {
         )}
       </View>
 
-      <View style={styles.treeCard}>
+      <Card style={styles.treeCard}>
         <Text style={styles.treeName}>{activeQuest.tree.common_name}</Text>
         <Text style={styles.treeScientific}>{activeQuest.tree.scientific_name}</Text>
-        <MapView
+        <TreeMap
           style={styles.map}
-          initialRegion={{
-            latitude: activeQuest.tree.latitude,
-            longitude: activeQuest.tree.longitude,
-            latitudeDelta: 0.002,
-            longitudeDelta: 0.002,
-          }}
-        >
-          <Marker
-            coordinate={{
-              latitude: activeQuest.tree.latitude,
-              longitude: activeQuest.tree.longitude,
-            }}
-            title={activeQuest.tree.common_name}
-            description={activeQuest.tree.scientific_name}
-          />
-        </MapView>
-      </View>
+          latitude={activeQuest.tree.latitude}
+          longitude={activeQuest.tree.longitude}
+          title={activeQuest.tree.common_name}
+          description={activeQuest.tree.scientific_name}
+        />
+      </Card>
 
       {expired ? (
         <View>
@@ -117,9 +109,7 @@ export default function FindTreeScreen() {
         </View>
       ) : (
         <View>
-          <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
-            <Text style={styles.buttonText}>📸 Take Photo</Text>
-          </TouchableOpacity>
+          <PrimaryButton title="📸 Take Photo" onPress={handleTakePhoto} style={{ marginBottom: 12 }} />
           <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
             <Text style={styles.cancelText}>Cancel Quest</Text>
           </TouchableOpacity>
@@ -130,63 +120,57 @@ export default function FindTreeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: colors.white },
   content: { padding: 24, paddingTop: 60, paddingBottom: 40 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  emptyText: { fontSize: 20, fontWeight: 'bold', color: '#1b4332', marginBottom: 8 },
-  emptySubtext: { fontSize: 14, color: '#666', textAlign: 'center' },
+  emptyText: { fontSize: 20, fontWeight: 'bold', color: colors.primaryDark, marginBottom: 8 },
+  emptySubtext: { fontSize: 14, color: colors.textSubtle, textAlign: 'center' },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 24,
   },
-  heading: { fontSize: 24, fontWeight: 'bold', color: '#1b4332' },
+  heading: { fontSize: 24, fontWeight: 'bold', color: colors.primaryDark },
   timer: {
-    backgroundColor: '#f0faf4',
+    backgroundColor: colors.cardBg,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderWidth: 1,
-    borderColor: '#b7e4c7',
+    borderColor: colors.cardBorder,
   },
   timerExpired: {
-    backgroundColor: '#fff3e0',
-    borderColor: '#ff9800',
+    backgroundColor: colors.warningBgAlt,
+    borderColor: colors.warning,
   },
-  timerText: { fontSize: 16, fontWeight: 'bold', color: '#2d6a4f', fontVariant: ['tabular-nums'] },
-  timerTextExpired: { color: '#ff9800' },
+  timerText: { fontSize: 16, fontWeight: 'bold', color: colors.primary, fontVariant: ['tabular-nums'] },
+  timerTextExpired: { color: colors.warning },
   treeCard: {
-    backgroundColor: '#f0faf4',
-    borderRadius: 16,
     padding: 20,
     marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#b7e4c7',
   },
-  treeName: { fontSize: 24, fontWeight: 'bold', color: '#1b4332', marginBottom: 4 },
-  treeScientific: { fontSize: 16, fontStyle: 'italic', color: '#555', marginBottom: 12 },
+  treeName: { fontSize: 24, fontWeight: 'bold', color: colors.primaryDark, marginBottom: 4 },
+  treeScientific: { fontSize: 16, fontStyle: 'italic', color: colors.textMuted, marginBottom: 12 },
   map: { width: '100%', height: 220, borderRadius: 12, marginTop: 4 },
-  button: { backgroundColor: '#2d6a4f', padding: 16, borderRadius: 8, alignItems: 'center', marginBottom: 12 },
-  buttonText: { color: 'white', fontSize: 16, fontWeight: '600' },
-  cancelButton: { padding: 16, borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: '#ccc' },
-  cancelText: { color: '#999', fontSize: 16, fontWeight: '600' },
+  cancelButton: { padding: 16, borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: colors.borderLight },
+  cancelText: { color: colors.placeholder, fontSize: 16, fontWeight: '600' },
   expiredBanner: {
-    backgroundColor: '#fff3e0',
+    backgroundColor: colors.warningBgAlt,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#ff9800',
+    borderColor: colors.warning,
   },
-  expiredText: { fontSize: 16, color: '#ff9800', fontWeight: '600' },
+  expiredText: { fontSize: 16, color: colors.warning, fontWeight: '600' },
   dismissButton: {
     borderWidth: 1,
-    borderColor: '#ff9800',
+    borderColor: colors.warning,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
   },
-  dismissText: { color: '#ff9800', fontSize: 16, fontWeight: '600' },
+  dismissText: { color: colors.warning, fontSize: 16, fontWeight: '600' },
 });

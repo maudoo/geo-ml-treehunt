@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import useAuthStore from '../src/store/authStore';
 import { View, ActivityIndicator } from 'react-native';
+import { colors } from '../src/theme';
 
 export default function RootLayout() {
   const { token, loadToken } = useAuthStore();
@@ -28,7 +29,7 @@ export default function RootLayout() {
   if (!isReady) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#2d6a4f" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }

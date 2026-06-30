@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import client from '../../src/api/client';
+import { colors } from '../../src/theme';
 
 interface LeaderboardPlayer {
   display_name: string;
@@ -34,7 +35,7 @@ export default function LeaderboardScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2d6a4f" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -60,7 +61,7 @@ export default function LeaderboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     padding: 24,
     paddingTop: 60,
   },
@@ -72,7 +73,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1b4332',
+    color: colors.primaryDark,
     marginBottom: 24,
   },
   row: {
@@ -80,22 +81,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.divider,
   },
   rank: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2d6a4f',
+    color: colors.primary,
     width: 40,
   },
   name: {
     flex: 1,
     fontSize: 16,
-    color: '#1b4332',
+    color: colors.primaryDark,
   },
   xp: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2d6a4f',
+    color: colors.primary,
   },
 });

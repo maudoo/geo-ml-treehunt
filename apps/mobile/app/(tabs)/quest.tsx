@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import useQuestStore, { Quest } from '../../src/store/questStore';
+import { colors } from '../../src/theme';
 
 export default function QuestScreen() {
   const { allQuests, isLoading, fetchAllQuests } = useQuestStore();
@@ -32,7 +33,7 @@ export default function QuestScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2d6a4f" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -88,7 +89,7 @@ function badgeStyle(status: string) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     paddingTop: 60,
   },
   centered: {
@@ -100,19 +101,19 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1b4332',
+    color: colors.primaryDark,
     paddingHorizontal: 24,
     marginBottom: 16,
   },
   emptyText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1b4332',
+    color: colors.primaryDark,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textSubtle,
     textAlign: 'center',
   },
   list: {
@@ -120,12 +121,12 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   card: {
-    backgroundColor: '#f0faf4',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#b7e4c7',
+    borderColor: colors.cardBorder,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -136,19 +137,19 @@ const styles = StyleSheet.create({
   treeName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1b4332',
+    color: colors.primaryDark,
     flex: 1,
     marginRight: 8,
   },
   treeScientific: {
     fontSize: 13,
     fontStyle: 'italic',
-    color: '#555',
+    color: colors.textMuted,
     marginBottom: 6,
   },
   meta: {
     fontSize: 12,
-    color: '#888',
+    color: colors.textFaint,
   },
   badge: {
     paddingHorizontal: 10,
@@ -156,16 +157,16 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   badgeActive: {
-    backgroundColor: '#2d6a4f',
+    backgroundColor: colors.primary,
   },
   badgeDone: {
-    backgroundColor: '#adb5bd',
+    backgroundColor: colors.disabled,
   },
   badgeExpired: {
-    backgroundColor: '#ff9800',
+    backgroundColor: colors.warning,
   },
   badgeCancelled: {
-    backgroundColor: '#adb5bd',
+    backgroundColor: colors.disabled,
   },
   badgeText: {
     color: 'white',

@@ -1,5 +1,6 @@
 import { withLayoutContext } from 'expo-router';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { colors } from '../../src/theme';
 
 const { Navigator } = createMaterialTopTabNavigator();
 const Tabs = withLayoutContext(Navigator);
@@ -10,12 +11,12 @@ export default function TabsLayout() {
       tabBarPosition="bottom"
       screenOptions={{
         swipeEnabled: true,
-        tabBarActiveTintColor: '#2d6a4f',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.placeholder,
         tabBarStyle: {
-          backgroundColor: '#fff',
+          backgroundColor: colors.white,
           borderTopWidth: 1,
-          borderTopColor: '#eee',
+          borderTopColor: colors.divider,
           height: 60,
           elevation: 0,
           shadowOpacity: 0,
@@ -31,7 +32,7 @@ export default function TabsLayout() {
           marginTop: 0,
         },
         tabBarIndicatorStyle: {
-          backgroundColor: '#2d6a4f',
+          backgroundColor: colors.primary,
           height: 2,
           top: 0,
         },
