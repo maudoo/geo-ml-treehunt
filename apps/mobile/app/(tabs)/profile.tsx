@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import client from '../../src/api/client';
 import useAuthStore from '../../src/store/authStore';
 import { colors } from '../../src/theme';
@@ -33,19 +33,21 @@ export default function ProfileScreen() {
   const { logout } = useAuthStore();
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await client.get('/users/me');
-        setProfile(response.data);
-      } catch {
-        console.error('Failed to fetch profile');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchProfile();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfile = async () => {
+        try {
+          const response = await client.get('/users/me');
+          setProfile(response.data);
+        } catch {
+          console.error('Failed to fetch profile');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchProfile();
+    }, [])
+  );
 
   const handleLogout = async () => {
     await logout();
