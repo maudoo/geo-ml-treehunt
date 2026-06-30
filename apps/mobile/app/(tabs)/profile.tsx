@@ -8,11 +8,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import client from '../../src/api/client';
 import useAuthStore from '../../src/store/authStore';
-import { colors } from '../../src/theme';
+import { colors, spacing } from '../../src/lib/theme';
 import Card from '../../src/components/Card';
-import { LEVEL_AVATARS } from '../../src/leveling';
+import { LEVEL_AVATARS } from '../../src/lib/leveling';
 
 interface ProfileData {
   display_name: string;
@@ -28,6 +29,7 @@ interface ProfileData {
 }
 
 export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { logout } = useAuthStore();
@@ -63,7 +65,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
       <Text style={styles.heading}>👤 Profile</Text>
 
       {profile && (
@@ -106,7 +108,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
     padding: 24,
-    paddingTop: 60,
   },
   centered: {
     flex: 1,

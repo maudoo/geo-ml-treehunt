@@ -9,14 +9,16 @@ import {
   ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import useQuestStore from '../../src/store/questStore';
 import client from '../../src/api/client';
-import { colors } from '../../src/theme';
+import { colors, spacing } from '../../src/lib/theme';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import Card from '../../src/components/Card';
 
 export default function CameraScreen() {
+  const insets = useSafeAreaInsets();
   const { activeQuest, submitQuest, fetchAllQuests, pendingPhoto, setPendingPhoto } = useQuestStore();
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
@@ -85,7 +87,7 @@ export default function CameraScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md }]}>
       <Text style={styles.heading}>Submit Photo</Text>
 
       <Card style={styles.treeCard}>
@@ -122,7 +124,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 24,
-    paddingTop: 60,
     paddingBottom: 40,
   },
   centered: {

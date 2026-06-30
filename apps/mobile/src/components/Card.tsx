@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { colors } from '../theme';
+import { colors } from '../lib/theme';
 
 // Green rounded card. Defaults match the common case (radius 16, padding 24);
 // pass `style` to override padding/radius/margins per screen.

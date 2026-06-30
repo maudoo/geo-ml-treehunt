@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -6,8 +6,10 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import client from '../../src/api/client';
-import { colors } from '../../src/theme';
+import { colors, spacing } from '../../src/lib/theme';
 
 interface LeaderboardPlayer {
   display_name: string;
@@ -15,22 +17,25 @@ interface LeaderboardPlayer {
 }
 
 export default function LeaderboardScreen() {
+  const insets = useSafeAreaInsets();
   const [players, setPlayers] = useState<LeaderboardPlayer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        const response = await client.get('/quests/leaderboard');
-        setPlayers(response.data);
-      } catch {
-        console.error('Failed to fetch leaderboard');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchLeaderboard();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchLeaderboard = async () => {
+        try {
+          const response = await client.get('/quests/leaderboard');
+          setPlayers(response.data);
+        } catch {
+          console.error('Failed to fetch leaderboard');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchLeaderboard();
+    }, [])
+  );
 
   if (isLoading) {
     return (
@@ -41,7 +46,7 @@ export default function LeaderboardScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
       <Text style={styles.heading}>🏆 Leaderboard</Text>
       <FlatList
         data={players}
@@ -63,7 +68,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
     padding: 24,
-    paddingTop: 60,
   },
   centered: {
     flex: 1,

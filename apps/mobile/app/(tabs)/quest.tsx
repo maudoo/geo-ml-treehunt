@@ -9,10 +9,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useQuestStore, { Quest } from '../../src/store/questStore';
-import { colors } from '../../src/theme';
+import { colors, spacing } from '../../src/lib/theme';
 
 export default function QuestScreen() {
+  const insets = useSafeAreaInsets();
   const { allQuests, isLoading, fetchAllQuests } = useQuestStore();
   const router = useRouter();
 
@@ -39,7 +41,7 @@ export default function QuestScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
       <Text style={styles.heading}>My Quests</Text>
       {allQuests.length === 0 ? (
         <View style={styles.centered}>
@@ -90,7 +92,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.white,
-    paddingTop: 60,
   },
   centered: {
     flex: 1,

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getToken } from '../storage';
+import { getToken } from '../lib/storage';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://geo-ml-treehunt-api-858416453237.us-east1.run.app';
 const client = axios.create({

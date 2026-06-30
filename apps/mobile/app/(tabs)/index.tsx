@@ -8,14 +8,17 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useQuestStore from '../../src/store/questStore';
 import useAuthStore from '../../src/store/authStore';
 import { useCountdown } from '../../src/hooks/useCountdown';
-import { colors } from '../../src/theme';
+import { colors, spacing } from '../../src/lib/theme';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import Card from '../../src/components/Card';
+import { confirmDestructive } from '../../src/lib/confirm';
 
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
   const { activeQuest, isLoading, fetchQuest, assignQuest, dismissQuest, cancelQuest } = useQuestStore();
   const { logout } = useAuthStore();
   const router = useRouter();
@@ -42,23 +45,17 @@ export default function HomeScreen() {
     if (!ok) Alert.alert('Error', 'Could not dismiss quest. Try again.');
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (!activeQuest) return;
-    Alert.alert(
+    const confirmed = await confirmDestructive(
       'Cancel Quest',
       'Are you sure? This tree will go back into the pool.',
-      [
-        { text: 'Keep Quest', style: 'cancel' },
-        {
-          text: 'Cancel Quest',
-          style: 'destructive',
-          onPress: async () => {
-            const ok = await cancelQuest(activeQuest.id);
-            if (!ok) Alert.alert('Error', 'Could not cancel quest. Try again.');
-          },
-        },
-      ]
+      'Cancel Quest',
+      'Keep Quest'
     );
+    if (!confirmed) return;
+    const ok = await cancelQuest(activeQuest.id);
+    if (!ok) Alert.alert('Error', 'Could not cancel quest. Try again.');
   };
 
   const handleLogout = async () => {
@@ -75,7 +72,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
       <View style={styles.header}>
         <Text style={styles.title}>AlphaHawk 🌳</Text>
         <TouchableOpacity onPress={handleLogout}>
@@ -123,7 +120,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.white, padding: 24, paddingTop: 60 },
+  container: { flex: 1, backgroundColor: colors.white, padding: 24 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 },
   title: { fontSize: 24, fontWeight: 'bold', color: colors.primary },

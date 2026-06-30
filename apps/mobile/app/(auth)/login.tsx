@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import useAuthStore from '../../src/store/authStore';
-import { colors } from '../../src/theme';
+import { colors } from '../../src/lib/theme';
 import PrimaryButton from '../../src/components/PrimaryButton';
 
 export default function LoginScreen() {

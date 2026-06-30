@@ -6,11 +6,13 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useQuestStore from '../../src/store/questStore';
-import { colors } from '../../src/theme';
+import { colors, spacing } from '../../src/lib/theme';
 import Card from '../../src/components/Card';
 
 export default function QuestDetailScreen() {
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { allQuests } = useQuestStore();
 
@@ -32,7 +34,7 @@ export default function QuestDetailScreen() {
     : null;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md }]}>
       <View style={styles.statusRow}>
         <View style={[styles.badge, quest.status === 'active' ? styles.badgeActive : styles.badgeDone]}>
           <Text style={styles.badgeText}>{quest.status === 'active' ? 'Active' : 'Completed'}</Text>
@@ -78,7 +80,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 24,
-    paddingTop: 60,
     paddingBottom: 40,
   },
   centered: {

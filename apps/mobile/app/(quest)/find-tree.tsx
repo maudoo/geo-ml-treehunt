@@ -7,15 +7,18 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import useQuestStore from '../../src/store/questStore';
 import { useCountdown } from '../../src/hooks/useCountdown';
-import { colors } from '../../src/theme';
+import { colors, spacing } from '../../src/lib/theme';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import Card from '../../src/components/Card';
 import TreeMap from '../../src/components/TreeMap';
+import { confirmDestructive } from '../../src/lib/confirm';
 
 export default function FindTreeScreen() {
+  const insets = useSafeAreaInsets();
   const { activeQuest, setPendingPhoto, dismissQuest, cancelQuest } = useQuestStore();
   const router = useRouter();
   const { display, expired } = useCountdown(activeQuest?.expires_at ?? null);
@@ -44,24 +47,18 @@ export default function FindTreeScreen() {
     else Alert.alert('Error', 'Could not dismiss quest. Try again.');
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (!activeQuest) return;
-    Alert.alert(
+    const confirmed = await confirmDestructive(
       'Cancel Quest',
       'Are you sure? This tree will go back into the pool.',
-      [
-        { text: 'Keep Quest', style: 'cancel' },
-        {
-          text: 'Cancel Quest',
-          style: 'destructive',
-          onPress: async () => {
-            const ok = await cancelQuest(activeQuest.id);
-            if (ok) router.replace('/(tabs)/');
-            else Alert.alert('Error', 'Could not cancel quest. Try again.');
-          },
-        },
-      ]
+      'Cancel Quest',
+      'Keep Quest'
     );
+    if (!confirmed) return;
+    const ok = await cancelQuest(activeQuest.id);
+    if (ok) router.replace('/(tabs)/');
+    else Alert.alert('Error', 'Could not cancel quest. Try again.');
   };
 
   if (!activeQuest) {
@@ -74,7 +71,7 @@ export default function FindTreeScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md }]}>
       <View style={styles.topRow}>
         <Text style={styles.heading}>Find This Tree</Text>
         {display && (
@@ -121,7 +118,7 @@ export default function FindTreeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.white },
-  content: { padding: 24, paddingTop: 60, paddingBottom: 40 },
+  content: { padding: 24, paddingBottom: 40 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
   emptyText: { fontSize: 20, fontWeight: 'bold', color: colors.primaryDark, marginBottom: 8 },
   emptySubtext: { fontSize: 14, color: colors.textSubtle, textAlign: 'center' },

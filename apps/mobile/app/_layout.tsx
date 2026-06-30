@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import useAuthStore from '../src/store/authStore';
 import { View, ActivityIndicator } from 'react-native';
-import { colors } from '../src/theme';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { colors } from '../src/lib/theme';
 
 export default function RootLayout() {
   const { token, loadToken } = useAuthStore();
@@ -35,6 +36,8 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }} />
+    <SafeAreaProvider>
+      <Stack screenOptions={{ headerShown: false }} />
+    </SafeAreaProvider>
   );
 }

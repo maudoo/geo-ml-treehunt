@@ -1,5 +1,5 @@
 import { TouchableOpacity, Text, ActivityIndicator, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { colors } from '../theme';
+import { colors } from '../lib/theme';
 
 type Props = {
   title: string;

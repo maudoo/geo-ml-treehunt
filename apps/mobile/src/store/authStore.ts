@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getToken, setToken, removeToken } from '../storage';
+import { getToken, setToken, removeToken } from '../lib/storage';
 import client from '../api/client';
 
 interface User {

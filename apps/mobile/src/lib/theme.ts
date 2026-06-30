@@ -24,3 +24,26 @@ export const colors = {
   warningBgAlt: '#fff3e0',
   danger: '#ff4444',
 } as const;
+
+// Spacing scale — use instead of picking arbitrary padding/margin numbers per screen.
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 40,
+} as const;
+
+// Font-size scale, named by role rather than pixel value.
+export const typography = {
+  caption: 12,
+  small: 13,
+  body: 14,
+  bodyLg: 16,
+  subheading: 18,
+  heading: 20,
+  headingLg: 24,
+  title: 28,
+  display: 36,
+} as const;
