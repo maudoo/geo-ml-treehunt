@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -8,13 +9,14 @@ import {
 import { useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useQuestStore from '../../src/store/questStore';
-import { colors, spacing } from '../../src/lib/theme';
+import { colors, spacing, rarityMeta } from '../../src/lib/theme';
 import Card from '../../src/components/Card';
 
 export default function QuestDetailScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { allQuests } = useQuestStore();
+  const [photoFailed, setPhotoFailed] = useState(false);
 
   const questIndex = allQuests.findIndex((q) => q.id === id);
   const quest = questIndex !== -1 ? allQuests[questIndex] : null;
@@ -48,6 +50,10 @@ export default function QuestDetailScreen() {
       <Text style={styles.treeName}>{quest.tree.common_name}</Text>
       <Text style={styles.treeScientific}>{quest.tree.scientific_name}</Text>
 
+      <View style={[styles.rarityPill, { backgroundColor: rarityMeta[quest.tree.rarity].color }]}>
+        <Text style={styles.rarityPillText}>{rarityMeta[quest.tree.rarity].label}</Text>
+      </View>
+
       <Card style={styles.metaCard}>
         <Row label="Assigned" value={assignedDate} />
         {completedDate && <Row label="Completed" value={completedDate} />}
@@ -57,7 +63,18 @@ export default function QuestDetailScreen() {
       {quest.photo_url ? (
         <View>
           <Text style={styles.sectionLabel}>Submitted Photo</Text>
-          <Image source={{ uri: quest.photo_url }} style={styles.photo} />
+          {photoFailed ? (
+            <View style={[styles.photo, styles.photoFallback]}>
+              <Text style={styles.photoFallbackIcon}>🖼️</Text>
+              <Text style={styles.photoFallbackText}>Photo unavailable</Text>
+            </View>
+          ) : (
+            <Image
+              source={{ uri: quest.photo_url }}
+              style={styles.photo}
+              onError={() => setPhotoFailed(true)}
+            />
+          )}
         </View>
       ) : null}
     </ScrollView>
@@ -136,7 +153,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: 'italic',
     color: colors.textMuted,
+    marginBottom: 12,
+  },
+  rarityPill: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
     marginBottom: 24,
+  },
+  rarityPillText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   metaCard: {
     borderRadius: 12,
@@ -174,5 +205,20 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 300,
     borderRadius: 12,
+  },
+  photoFallback: {
+    backgroundColor: colors.successBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+  },
+  photoFallbackIcon: {
+    fontSize: 40,
+    marginBottom: 8,
+  },
+  photoFallbackText: {
+    fontSize: 14,
+    color: colors.textSubtle,
   },
 });

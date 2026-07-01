@@ -19,8 +19,8 @@ async def register(data: UserRegister, db: AsyncSession = Depends(get_db)):
     result = await register_user(db, data)
     if result is None:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Registration failed"
         )
     return result
 

@@ -5,7 +5,6 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,6 +13,8 @@ import useAuthStore from '../../src/store/authStore';
 import { colors, spacing } from '../../src/lib/theme';
 import Card from '../../src/components/Card';
 import { LEVEL_AVATARS } from '../../src/lib/leveling';
+import SkeletonBox from '../../src/components/SkeletonBox';
+import Tooltip from '../../src/components/Tooltip';
 
 interface ProfileData {
   display_name: string;
@@ -21,6 +22,7 @@ interface ProfileData {
   xp: number;
   rank: number;
   total_players: number;
+  trees_found: number;
   level: number;
   is_max_level: boolean;
   xp_into_level: number;
@@ -58,8 +60,21 @@ export default function ProfileScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
+        <Text style={styles.heading}>👤 Profile</Text>
+        <View style={styles.avatarSection}>
+          <SkeletonBox width={140} height={140} borderRadius={70} style={{ marginBottom: 12 }} />
+          <SkeletonBox width={160} height={24} borderRadius={6} style={{ marginBottom: 8 }} />
+          <SkeletonBox width={200} height={14} borderRadius={6} />
+        </View>
+        <Card style={styles.statCard}>
+          <SkeletonBox width={90} height={28} borderRadius={99} style={{ marginBottom: 8 }} />
+          <SkeletonBox width={160} height={14} borderRadius={6} />
+        </Card>
+        <Card style={styles.statCard}>
+          <SkeletonBox width="100%" height={12} borderRadius={6} />
+          <SkeletonBox width={180} height={12} borderRadius={6} style={{ marginTop: 8 }} />
+        </Card>
       </View>
     );
   }
@@ -73,14 +88,29 @@ export default function ProfileScreen() {
           <View style={styles.avatarSection}>
             <Image source={LEVEL_AVATARS[profile.level]} style={styles.avatar} />
             <Text style={styles.name}>{profile.display_name}</Text>
-            <Text style={styles.email}>{profile.email}</Text>
+            <Text style={styles.email} numberOfLines={1} ellipsizeMode="tail">{profile.email}</Text>
           </View>
 
           <Card style={styles.statCard}>
-            <View style={styles.levelBadge}>
-              <Text style={styles.levelBadgeText}>Level {profile.level}</Text>
-            </View>
+            <Tooltip
+              rich
+              label={
+                profile.is_max_level
+                  ? 'Max level reached'
+                  : `${profile.xp_into_level} / ${profile.xp_for_level} XP to Level ${profile.level + 1}`
+              }
+            >
+              <View style={styles.levelBadge}>
+                <Text style={styles.levelBadgeText}>Level {profile.level}</Text>
+              </View>
+            </Tooltip>
             <Text style={styles.rank}>#{profile.rank} of {profile.total_players} players</Text>
+            <View style={styles.treesFoundRow}>
+              <Text style={styles.treesFoundCount}>🌳 {profile.trees_found}</Text>
+              <Text style={styles.treesFoundLabel}>
+                {profile.trees_found === 1 ? 'tree found' : 'trees found'}
+              </Text>
+            </View>
           </Card>
 
           <Card style={styles.statCard}>
@@ -157,6 +187,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   rank: {
+    fontSize: 14,
+    color: colors.textSubtle,
+  },
+  treesFoundRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginTop: 12,
+  },
+  treesFoundCount: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.primaryDark,
+    marginRight: 6,
+  },
+  treesFoundLabel: {
     fontSize: 14,
     color: colors.textSubtle,
   },

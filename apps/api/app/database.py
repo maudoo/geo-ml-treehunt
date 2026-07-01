@@ -7,8 +7,12 @@ connect_args = {"ssl": "require"} if settings.database_ssl else {}
 engine = create_async_engine(
     settings.database_url,
     echo=settings.debug,
-    pool_size=10,
-    max_overflow=20,
+    # Neon serverless closes idle connections aggressively and caps total
+    # connections low. Keep the pool small and recycle before Neon drops them.
+    pool_size=5,
+    max_overflow=5,
+    pool_timeout=10,
+    pool_recycle=300,
     pool_pre_ping=True,
     connect_args=connect_args,
 )

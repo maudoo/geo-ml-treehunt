@@ -50,23 +50,6 @@ async def assign_quest(db: AsyncSession, user_id:str) -> Quest | None:
     db.add(quest)
     await db.flush()
 
-    # Guard against the race where two concurrent calls both passed the
-    # active-quest check above and each inserted an active quest.
-    # ponytail: post-insert count check — swap for a partial unique index
-    # on (user_id) WHERE status='active' if this path gets hot.
-    active_count = await db.execute(
-        select(func.count())
-        .select_from(Quest)
-        .where(
-            Quest.user_id == uuid.UUID(user_id),
-            Quest.status == "active",
-        )
-    )
-    if active_count.scalar() > 1:
-        await db.delete(quest)
-        await db.flush()
-        return "has_active_quest"
-
     # Reload quest with tree data attached
     result = await db.execute(
         select(Quest)
@@ -112,9 +95,9 @@ async def submit_quest(
     if quest.user_id != uuid.UUID(user_id):
         return "not_found"
 
-    # Quest already completed, expired, or cancelled
+    # Quest already completed or expired
     if quest.status != "active":
-        return "already_completed" if quest.status == "completed" else "not_active"
+        return "already_completed"
 
     # Expiry check
     if quest.expires_at and datetime.now(timezone.utc) > quest.expires_at:
@@ -122,33 +105,30 @@ async def submit_quest(
         await db.flush()
         return "expired"
 
-    # Validate the client-supplied photo URL points at this user's own
-    # upload path in our bucket — never trust it verbatim.
-    expected_prefix = (
-        f"https://storage.googleapis.com/{settings.gcs_bucket}/photos/{user_id}/"
-    )
-    if not (photo_url.startswith(expected_prefix) and photo_url.endswith(".jpg")):
+    # photo_url must point to this user's own folder in our bucket, not an arbitrary URL
+    expected_prefix = f"https://storage.googleapis.com/{settings.gcs_bucket}/photos/{user_id}/"
+    if not photo_url.startswith(expected_prefix) or not photo_url.endswith(".jpg"):
         return "invalid_photo_url"
 
-    # ponytail: proximity check disabled for testing, re-enable before go-live
-    # proximity = await db.execute(
-    #     text("""
-    #         SELECT ST_DWithin(
-    #             location::geography,
-    #             ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
-    #             :radius
-    #         )
-    #         FROM trees WHERE id = :tree_id
-    #     """),
-    #     {
-    #         "lng": longitude,
-    #         "lat": latitude,
-    #         "radius": settings.quest_proximity_meters,
-    #         "tree_id": str(quest.tree_id),
-    #     },
-    # )
-    # if not proximity.scalar():
-    #     return "too_far"
+    # Proximity check: user must be within range of the target tree to complete it.
+    proximity = await db.execute(
+        text("""
+            SELECT ST_DWithin(
+                location::geography,
+                ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+                :radius
+            )
+            FROM trees WHERE id = :tree_id
+        """),
+        {
+            "lng": longitude,
+            "lat": latitude,
+            "radius": settings.quest_proximity_meters,
+            "tree_id": str(quest.tree_id),
+        },
+    )
+    if not proximity.scalar():
+        return "too_far"
 
     # Complete the quest
     quest.photo_url = photo_url

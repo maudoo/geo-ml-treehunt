@@ -5,11 +5,12 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useQuestStore from '../../src/store/questStore';
+import SkeletonBox from '../../src/components/SkeletonBox';
+import Tooltip from '../../src/components/Tooltip';
 import useAuthStore from '../../src/store/authStore';
 import { useCountdown } from '../../src/hooks/useCountdown';
 import { colors, spacing } from '../../src/lib/theme';
@@ -65,8 +66,19 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
+        <View style={styles.header}>
+          <Text style={styles.title}>AlphaHawk 🌳</Text>
+        </View>
+        <Card>
+          <View style={styles.questTitleRow}>
+            <SkeletonBox width={90} height={12} borderRadius={6} />
+            <SkeletonBox width={60} height={14} borderRadius={6} />
+          </View>
+          <SkeletonBox width="80%" height={28} borderRadius={6} style={{ marginBottom: 8 }} />
+          <SkeletonBox width="60%" height={16} borderRadius={6} style={{ marginBottom: 24 }} />
+          <SkeletonBox width="100%" height={48} borderRadius={8} />
+        </Card>
       </View>
     );
   }
@@ -87,9 +99,11 @@ export default function HomeScreen() {
               {expired ? 'Quest Expired' : 'Active Quest'}
             </Text>
             {display && (
-              <Text style={[styles.timer, expired && styles.timerExpired]}>
-                {expired ? 'Expired' : display}
-              </Text>
+              <Tooltip label={expired ? 'This quest has expired' : 'Time left to find this tree'}>
+                <Text style={[styles.timer, expired && styles.timerExpired]}>
+                  {expired ? 'Expired' : display}
+                </Text>
+              </Tooltip>
             )}
           </View>
           <Text style={styles.treeName}>{activeQuest.tree.common_name}</Text>

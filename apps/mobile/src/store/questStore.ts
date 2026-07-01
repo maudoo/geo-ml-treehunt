@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import client from '../api/client';
 
+export type Rarity = 'common' | 'rare' | 'legendary';
+
 interface Tree {
   id: string;
   campus_tag_id: string;
@@ -8,6 +10,8 @@ interface Tree {
   scientific_name: string;
   latitude: number;
   longitude: number;
+  times_found: number;
+  rarity: Rarity;
 }
 
 export interface Quest {
@@ -30,12 +34,12 @@ interface QuestState {
   fetchQuest: () => Promise<void>;
   fetchAllQuests: () => Promise<void>;
   assignQuest: () => Promise<boolean>;
-  submitQuest: (questId: string, photoUrl: string, latitude: number, longitude: number) => Promise<'success' | 'too_far' | 'expired' | 'error'>;
+  submitQuest: (questId: string, photoUrl: string, latitude: number, longitude: number) => Promise<{ result: 'success'; pointsAwarded: number } | { result: 'too_far' | 'expired' | 'error' }>;
   dismissQuest: (questId: string) => Promise<boolean>;
   cancelQuest: (questId: string) => Promise<boolean>;
 }
 
-const useQuestStore = create<QuestState>((set) => ({
+const useQuestStore = create<QuestState>((set, get) => ({
   activeQuest: null,
   allQuests: [],
   isLoading: false,
@@ -82,31 +86,37 @@ const useQuestStore = create<QuestState>((set) => ({
         longitude,
       });
       set({ activeQuest: response.data, isLoading: false, pendingPhoto: null });
-      return 'success';
+      return { result: 'success', pointsAwarded: response.data.points_awarded };
     } catch (error: any) {
       set({ isLoading: false });
-      if (error?.response?.status === 403) return 'too_far';
-      if (error?.response?.status === 410) return 'expired';
-      return 'error';
+      if (error?.response?.status === 403) return { result: 'too_far' };
+      if (error?.response?.status === 410) return { result: 'expired' };
+      return { result: 'error' };
     }
   },
 
   dismissQuest: async (questId) => {
+    const snapshot = get().activeQuest;
+    set({ activeQuest: null }); // optimistic: remove immediately
     try {
       await client.post(`/quests/${questId}/dismiss`);
-      set({ activeQuest: null });
       return true;
     } catch {
+      set({ activeQuest: snapshot }); // revert
       return false;
     }
   },
 
   cancelQuest: async (questId) => {
+    const snapshot = get().activeQuest;
+    // optimistic: flip status to cancelled immediately
+    set({ activeQuest: snapshot ? { ...snapshot, status: 'cancelled' } : null });
     try {
       await client.post(`/quests/${questId}/cancel`);
       set({ activeQuest: null });
       return true;
     } catch {
+      set({ activeQuest: snapshot }); // revert
       return false;
     }
   },

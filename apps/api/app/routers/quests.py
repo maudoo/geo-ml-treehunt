@@ -64,12 +64,10 @@ async def submit(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quest not found.")
     if result == "already_completed":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This quest is already completed.")
-    if result == "not_active":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Quest is no longer active.")
-    if result == "invalid_photo_url":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Photo URL is invalid.")
     if result == "too_far":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not close enough to the tree.")
+    if result == "invalid_photo_url":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Photo URL is invalid.")
     if result == "expired":
         raise HTTPException(status_code=status.HTTP_410_GONE, detail="Quest has expired.")
     return result
@@ -134,13 +132,21 @@ async def get_upload_url(
     bucket = gcs.bucket(settings.gcs_bucket)
     blob = bucket.blob(blob_name)
 
+    # Bind a size range into the signature so GCS rejects oversized PUTs at the
+    # bucket. The client must send the matching x-goog-content-length-range header.
+    size_range = f"0,{settings.max_photo_bytes}"
     signed_url = blob.generate_signed_url(
         expiration=timedelta(minutes=15),
         method="PUT",
         content_type="image/jpeg",
         version="v4",
+        headers={"x-goog-content-length-range": size_range},
         service_account_email=credentials.service_account_email,
         access_token=credentials.token,
     )
     public_url = f"https://storage.googleapis.com/{settings.gcs_bucket}/{blob_name}"
-    return {"upload_url": signed_url, "photo_url": public_url}
+    return {
+        "upload_url": signed_url,
+        "photo_url": public_url,
+        "required_headers": {"x-goog-content-length-range": size_range},
+    }

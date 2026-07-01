@@ -16,6 +16,7 @@ import client from '../../src/api/client';
 import { colors, spacing } from '../../src/lib/theme';
 import PrimaryButton from '../../src/components/PrimaryButton';
 import Card from '../../src/components/Card';
+import { haptics } from '../../src/lib/haptics';
 
 export default function CameraScreen() {
   const insets = useSafeAreaInsets();
@@ -41,6 +42,10 @@ export default function CameraScreen() {
         const xhr = new XMLHttpRequest();
         xhr.open('PUT', data.upload_url);
         xhr.setRequestHeader('Content-Type', 'image/jpeg');
+        // Signed URL binds a size range; the matching header must be sent or GCS rejects the PUT.
+        Object.entries(data.required_headers ?? {}).forEach(([k, v]) =>
+          xhr.setRequestHeader(k, v as string),
+        );
         xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(`GCS ${xhr.status}`)));
         xhr.onerror = reject;
         xhr.send({ uri: pendingPhoto, type: 'image/jpeg', name: 'photo.jpg' } as any);
@@ -49,12 +54,13 @@ export default function CameraScreen() {
     } catch (e: any) {
       setUploading(false);
       console.log('UPLOAD ERROR:', e?.response?.data?.detail ?? e?.message ?? String(e), e);
+      haptics.error();
       Alert.alert('Upload failed', 'Could not upload photo. Try again.');
       return;
     }
 
     const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
-    const result = await submitQuest(
+    const outcome = await submitQuest(
       activeQuest.id,
       photoUrl,
       location.coords.latitude,
@@ -63,16 +69,20 @@ export default function CameraScreen() {
 
     setUploading(false);
 
-    if (result === 'success') {
+    if (outcome.result === 'success') {
+      haptics.success();
       await fetchAllQuests();
-      Alert.alert('Quest Complete!', 'You earned 100 XP!');
+      Alert.alert('Quest Complete!', `You earned ${outcome.pointsAwarded} XP!`);
       router.push('/(tabs)/quest');
-    } else if (result === 'too_far') {
+    } else if (outcome.result === 'too_far') {
+      haptics.warning();
       Alert.alert('Not close enough', 'You need to be closer to the tree to submit.');
-    } else if (result === 'expired') {
+    } else if (outcome.result === 'expired') {
+      haptics.warning();
       Alert.alert('Quest expired', 'Your time ran out. Dismiss the quest and get a new one.');
       router.replace('/find-tree');
     } else {
+      haptics.error();
       Alert.alert('Error', 'Could not submit quest. Try again.');
     }
   };

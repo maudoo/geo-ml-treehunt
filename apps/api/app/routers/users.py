@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from app.database import get_db
 from app.core.dependencies import get_current_user
 from app.models.user import User
+from app.models.quest import Quest
 from app.schemas.user import UserResponse
 from app.services.leveling import get_level_info
 import uuid
@@ -19,9 +20,7 @@ async def get_me(
     result = await db.execute(
         select(User).where(User.id == uuid.UUID(user_id))
     )
-    user = result.scalar_one_or_none()
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+    user = result.scalar_one()
 
     rank_result = await db.execute(
         select(func.count()).select_from(User).where(User.xp > user.xp)
@@ -30,6 +29,13 @@ async def get_me(
 
     total_result = await db.execute(select(func.count()).select_from(User))
     total_players = total_result.scalar()
+
+    trees_found_result = await db.execute(
+        select(func.count())
+        .select_from(Quest)
+        .where(Quest.user_id == user.id, Quest.status == "completed")
+    )
+    trees_found = trees_found_result.scalar()
 
     level_info = get_level_info(user.xp)
 
@@ -40,6 +46,7 @@ async def get_me(
         xp=user.xp,
         rank=rank,
         total_players=total_players,
+        trees_found=trees_found,
         level=level_info["level"],
         is_max_level=level_info["is_max_level"],
         xp_into_level=level_info["xp_into_level"],

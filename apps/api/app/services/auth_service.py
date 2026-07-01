@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 from app.core.security import hash_password, create_access_token, verify_password
 from sqlalchemy import select
 from app.models import User
@@ -18,7 +19,14 @@ async def register_user(db:AsyncSession, data: UserRegister) -> dict:
     )
 
     db.add(user)
-    await db.flush()
+    try:
+        # Closes the check-then-insert race: two concurrent registrations for
+        # the same email both pass the select above; the unique constraint
+        # catches the loser here. Return None so the router emits a clean 409.
+        await db.flush()
+    except IntegrityError:
+        await db.rollback()
+        return None
 
     token = create_access_token(str(user.id))
     return {"access_token": token, "token_type": "bearer"}

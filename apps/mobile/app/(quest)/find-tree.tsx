@@ -16,6 +16,7 @@ import PrimaryButton from '../../src/components/PrimaryButton';
 import Card from '../../src/components/Card';
 import TreeMap from '../../src/components/TreeMap';
 import { confirmDestructive } from '../../src/lib/confirm';
+import { compressImage } from '../../src/lib/compressImage';
 
 export default function FindTreeScreen() {
   const insets = useSafeAreaInsets();
@@ -35,7 +36,8 @@ export default function FindTreeScreen() {
       quality: 0.8,
     });
     if (!result.canceled) {
-      setPendingPhoto(result.assets[0].uri);
+      const compressed = await compressImage(result.assets[0].uri);
+      setPendingPhoto(compressed);
       router.push('/camera');
     }
   };
@@ -107,9 +109,7 @@ export default function FindTreeScreen() {
       ) : (
         <View>
           <PrimaryButton title="📸 Take Photo" onPress={handleTakePhoto} style={{ marginBottom: 12 }} />
-          <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-            <Text style={styles.cancelText}>Cancel Quest</Text>
-          </TouchableOpacity>
+          <PrimaryButton title="Cancel Quest" variant="secondary" onPress={handleCancel} />
         </View>
       )}
     </ScrollView>
@@ -150,8 +150,6 @@ const styles = StyleSheet.create({
   treeName: { fontSize: 24, fontWeight: 'bold', color: colors.primaryDark, marginBottom: 4 },
   treeScientific: { fontSize: 16, fontStyle: 'italic', color: colors.textMuted, marginBottom: 12 },
   map: { width: '100%', height: 220, borderRadius: 12, marginTop: 4 },
-  cancelButton: { padding: 16, borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: colors.borderLight },
-  cancelText: { color: colors.placeholder, fontSize: 16, fontWeight: '600' },
   expiredBanner: {
     backgroundColor: colors.warningBgAlt,
     borderRadius: 12,

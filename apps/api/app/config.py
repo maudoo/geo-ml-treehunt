@@ -22,20 +22,19 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 1440 #if someone steals a token, it only works for 24 hours maximum.
 
 
-    # Storage
-    gcs_bucket: str = "geo-ml-treehunt-photos"
-
-    # Game
-    points_per_quest: int = 100
-
-    # Quests
-    quest_proximity_meters: int = 100
-
-    # CORS
+    # CORS — comma-separated list of allowed origins
     cors_origins: str = "http://localhost:8081,http://localhost:19006"
 
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    # Storage
+    gcs_bucket: str = "geo-ml-treehunt-photos"
+    max_photo_bytes: int = 10 * 1024 * 1024  # 10 MB cap on quest photo uploads
+
+    # Game
+    points_per_quest: int = 100
+    quest_proximity_meters: int = 100  # how close a user must be to a tree to complete its quest
 
 settings = Settings()
