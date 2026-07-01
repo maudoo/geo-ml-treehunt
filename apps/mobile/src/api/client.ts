@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { router } from 'expo-router';
 import { getToken } from '../lib/storage';
-import useAuthStore from '../store/authStore';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://geo-ml-treehunt-api-858416453237.us-east1.run.app';
 const client = axios.create({
@@ -27,7 +26,8 @@ client.interceptors.response.use(
     if (error.response?.status === 401 && !redirecting) {
       redirecting = true;
       try {
-        await useAuthStore.getState().logout();
+        // Lazy require breaks the authStore → client → authStore cycle
+        await require('../store/authStore').default.getState().logout();
         router.replace('/(auth)/login' as any);
       } finally {
         redirecting = false;
