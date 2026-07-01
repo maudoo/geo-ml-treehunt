@@ -64,6 +64,10 @@ async def submit(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quest not found.")
     if result == "already_completed":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This quest is already completed.")
+    if result == "not_active":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Quest is no longer active.")
+    if result == "invalid_photo_url":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Photo URL is invalid.")
     if result == "too_far":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not close enough to the tree.")
     if result == "expired":

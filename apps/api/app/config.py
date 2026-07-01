@@ -26,6 +26,16 @@ class Settings(BaseSettings):
     gcs_bucket: str = "geo-ml-treehunt-photos"
 
     # Game
-    points_per_quest: int = 100 
+    points_per_quest: int = 100
+
+    # Quests
+    quest_proximity_meters: int = 100
+
+    # CORS
+    cors_origins: str = "http://localhost:8081,http://localhost:19006"
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
 settings = Settings()
