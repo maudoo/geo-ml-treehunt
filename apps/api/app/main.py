@@ -31,6 +31,8 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
+    # Expo tunnel URLs (exp.direct) change every session — allow the whole domain for dev
+    allow_origin_regex=r"https://.*\.exp\.direct",
     allow_methods=["*"],
     allow_headers=["*"],
     allow_credentials=True,
