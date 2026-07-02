@@ -5,11 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
 from app.config import settings
-from app.routers import auth, quests, users
+from app.routers import auth, quests, users, admin
 
 logger = logging.getLogger("alphahawk")
-
-security = HTTPBearer()
 
 # debug must never be on in production: Starlette returns full tracebacks
 # (including local vars like the JWT secret) to the client when it is.
@@ -41,6 +39,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(quests.router)
 app.include_router(users.router)
+app.include_router(admin.router)
 
 
 

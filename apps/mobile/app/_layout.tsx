@@ -4,6 +4,7 @@ import useAuthStore from '../src/store/authStore';
 import { View, ActivityIndicator } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { colors } from '../src/lib/theme';
+import ErrorBoundary from '../src/components/ErrorBoundary';
 
 export default function RootLayout() {
   const { token, loadToken } = useAuthStore();
@@ -36,8 +37,10 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }

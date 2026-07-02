@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     gcs_bucket: str = "geo-ml-treehunt-photos"
     max_photo_bytes: int = 10 * 1024 * 1024  # 10 MB cap on quest photo uploads
 
+    # Admin panel
+    admin_username: str = "admin"
+    admin_password: str
+
     # Game
     points_per_quest: int = 100
     quest_proximity_meters: int = 100  # how close a user must be to a tree to complete its quest
