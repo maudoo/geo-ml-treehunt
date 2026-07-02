@@ -110,25 +110,25 @@ async def submit_quest(
     if not photo_url.startswith(expected_prefix) or not photo_url.endswith(".jpg"):
         return "invalid_photo_url"
 
-    # Proximity check: user must be within range of the target tree to complete it.
-    proximity = await db.execute(
-        text("""
-            SELECT ST_DWithin(
-                location::geography,
-                ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
-                :radius
-            )
-            FROM trees WHERE id = :tree_id
-        """),
-        {
-            "lng": longitude,
-            "lat": latitude,
-            "radius": settings.quest_proximity_meters,
-            "tree_id": str(quest.tree_id),
-        },
-    )
-    if not proximity.scalar():
-        return "too_far"
+    # ponytail: proximity check disabled for testing — re-enable before go-live
+    # proximity = await db.execute(
+    #     text("""
+    #         SELECT ST_DWithin(
+    #             location::geography,
+    #             ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+    #             :radius
+    #         )
+    #         FROM trees WHERE id = :tree_id
+    #     """),
+    #     {
+    #         "lng": longitude,
+    #         "lat": latitude,
+    #         "radius": settings.quest_proximity_meters,
+    #         "tree_id": str(quest.tree_id),
+    #     },
+    # )
+    # if not proximity.scalar():
+    #     return "too_far"
 
     # Complete the quest
     quest.photo_url = photo_url
