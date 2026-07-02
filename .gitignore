@@ -35,3 +35,7 @@ npm-debug.log*
 
 # Neon CLI project markers
 .neon
+
+# Proprietary source data — already imported into DB
+*.ods
+apps/api/scripts/*.log
