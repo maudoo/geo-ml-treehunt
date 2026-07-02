@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useQuestStore from '../../src/store/questStore';
@@ -66,7 +67,7 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
+      <ScrollView style={styles.scroll} contentContainerStyle={[styles.container, { paddingTop: insets.top + spacing.md }]}>
         <View style={styles.header}>
           <Text style={styles.title}>AlphaHawk 🌳</Text>
         </View>
@@ -79,12 +80,12 @@ export default function HomeScreen() {
           <SkeletonBox width="60%" height={16} borderRadius={6} style={{ marginBottom: 24 }} />
           <SkeletonBox width="100%" height={48} borderRadius={8} />
         </Card>
-      </View>
+      </ScrollView>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
+    <ScrollView style={styles.scroll} contentContainerStyle={[styles.container, { paddingTop: insets.top + spacing.md }]}>
       <View style={styles.header}>
         <Text style={styles.title}>AlphaHawk 🌳</Text>
         <TouchableOpacity onPress={handleLogout}>
@@ -129,12 +130,13 @@ export default function HomeScreen() {
           <PrimaryButton title="Find a Quest 🌿" onPress={handleAssign} style={{ marginBottom: 12 }} />
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.white, padding: 24 },
+  scroll: { flex: 1, backgroundColor: colors.white },
+  container: { padding: 24 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 },
   title: { fontSize: 24, fontWeight: 'bold', color: colors.primary },

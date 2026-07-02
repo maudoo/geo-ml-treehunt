@@ -5,6 +5,7 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
+  ScrollView,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -60,7 +61,7 @@ export default function ProfileScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
+      <ScrollView style={styles.scroll} contentContainerStyle={[styles.container, { paddingTop: insets.top + spacing.md }]}>
         <Text style={styles.heading}>👤 Profile</Text>
         <View style={styles.avatarSection}>
           <SkeletonBox width={140} height={140} borderRadius={70} style={{ marginBottom: 12 }} />
@@ -75,12 +76,12 @@ export default function ProfileScreen() {
           <SkeletonBox width="100%" height={12} borderRadius={6} />
           <SkeletonBox width={180} height={12} borderRadius={6} style={{ marginTop: 8 }} />
         </Card>
-      </View>
+      </ScrollView>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
+    <ScrollView style={styles.scroll} contentContainerStyle={[styles.container, { paddingTop: insets.top + spacing.md }]}>
       <Text style={styles.heading}>👤 Profile</Text>
 
       {profile && (
@@ -129,14 +130,16 @@ export default function ProfileScreen() {
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scroll: {
     flex: 1,
     backgroundColor: colors.white,
+  },
+  container: {
     padding: 24,
   },
   centered: {

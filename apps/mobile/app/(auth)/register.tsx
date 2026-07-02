@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import useAuthStore from '../../src/store/authStore';
@@ -37,7 +38,7 @@ export default function RegisterScreen() {
 };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
       <Text style={styles.title}>Join AlphaHawk 🌳</Text>
       <Text style={styles.subtitle}>Create your account</Text>
 
@@ -76,16 +77,16 @@ export default function RegisterScreen() {
       <TouchableOpacity onPress={() => router.back()}>
         <Text style={styles.link}>Already have an account? Login</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scroll: { flex: 1, backgroundColor: colors.white },
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 24,
-    backgroundColor: colors.white,
   },
   title: {
     fontSize: 36,

@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     admin_username: str = "admin"
     admin_password: str
 
+    # Email
+    resend_api_key: str
+
     # Game
     points_per_quest: int = 100
     quest_proximity_meters: int = 100  # how close a user must be to a tree to complete its quest

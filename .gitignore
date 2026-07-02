@@ -25,6 +25,10 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+.VSCodeCounter/
+
+# Local scratch assets (not app assets — those live in apps/mobile/assets)
+avatar_images/
 
 # Logs
 *.log
