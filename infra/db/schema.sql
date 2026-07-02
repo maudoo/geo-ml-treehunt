@@ -49,13 +49,6 @@ CREATE TABLE quests (
 
     CONSTRAINT valid_status CHECK (status IN ('active', 'submitted', 'completed', 'expired', 'skipped'))
 );
-CREATE TABLE password_reset_tokens (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token VARCHAR(64) UNIQUE NOT NULL,
-    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    used BOOLEAN DEFAULT FALSE NOT NULL
-);
 
 -- looked up every time a student opens the app
 CREATE INDEX idx_quests_user_id ON quests(user_id);

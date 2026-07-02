@@ -61,10 +61,6 @@ export default function LoginScreen() {
       <TouchableOpacity onPress={() => router.push('/(auth)/register' as any)}>
         <Text style={styles.link}>Don't have an account? Register</Text>
       </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => router.push('/(auth)/forgot-password' as any)} style={{ marginTop: 12 }}>
-        <Text style={styles.link}>Forgot password?</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 }
