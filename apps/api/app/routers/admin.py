@@ -2,12 +2,9 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.core.dependencies import get_admin
-from app.models.user import User
-from app.models.quest import Quest
+from app.services.admin_service import get_completed_quests, set_user_active
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -17,13 +14,7 @@ async def admin_panel(
     _: str = Depends(get_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(
-        select(Quest)
-        .where(Quest.status == "completed", Quest.photo_url.isnot(None))
-        .options(selectinload(Quest.user), selectinload(Quest.tree))
-        .order_by(Quest.completed_at.desc())
-    )
-    quests = result.scalars().all()
+    quests = await get_completed_quests(db)
 
     rows = ""
     for q in quests:
@@ -84,11 +75,9 @@ async def ban_user(
     _: str = Depends(get_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    user = await db.get(User, user_id)
+    user = await set_user_active(db, user_id, is_active=False)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
-    user.is_active = False
-    await db.flush()
     return "<script>window.location='/admin'</script>"
 
 
@@ -98,9 +87,7 @@ async def unban_user(
     _: str = Depends(get_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    user = await db.get(User, user_id)
+    user = await set_user_active(db, user_id, is_active=True)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
-    user.is_active = True
-    await db.flush()
     return "<script>window.location='/admin'</script>"
