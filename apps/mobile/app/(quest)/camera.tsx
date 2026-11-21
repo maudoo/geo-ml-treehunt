@@ -37,18 +37,10 @@ export default function CameraScreen() {
 
     let photoUrl: string;
     try {
-      const { data } = await client.post('/quests/upload-url', {});
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('PUT', data.upload_url);
-        xhr.setRequestHeader('Content-Type', 'image/jpeg');
-        // Signed URL binds a size range; the matching header must be sent or GCS rejects the PUT.
-        Object.entries(data.required_headers ?? {}).forEach(([k, v]) =>
-          xhr.setRequestHeader(k, v as string),
-        );
-        xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(`GCS ${xhr.status}`)));
-        xhr.onerror = reject;
-        xhr.send({ uri: pendingPhoto, type: 'image/jpeg', name: 'photo.jpg' } as any);
+      const formData = new FormData();
+      formData.append('file', { uri: pendingPhoto, type: 'image/jpeg', name: 'photo.jpg' } as any);
+      const { data } = await client.post('/quests/upload-photo', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       photoUrl = data.photo_url;
     } catch (e: any) {

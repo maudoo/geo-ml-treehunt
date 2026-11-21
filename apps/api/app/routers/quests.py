@@ -1,7 +1,6 @@
 import uuid
-import boto3
-from botocore.config import Config
-from fastapi import APIRouter, Depends, HTTPException, status
+from pathlib import Path
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.core.dependencies import get_current_user
@@ -117,24 +116,28 @@ async def leaderboard(
     return await get_leaderboard(db)
 
 
-@router.post("/upload-url")
-async def get_upload_url(
+@router.post("/upload-photo")
+async def upload_photo(
+    request: Request,
+    file: UploadFile = File(...),
     user_id: str = Depends(get_current_user),
 ):
-    blob_name = f"photos/{user_id}/{uuid.uuid4()}.jpg"
+    if file.content_type != "image/jpeg":
+        raise HTTPException(status_code=400, detail="Only JPEG photos accepted.")
 
-    s3 = boto3.client(
-        "s3",
-        endpoint_url=f"https://{settings.r2_account_id}.r2.cloudflarestorage.com",
-        aws_access_key_id=settings.r2_access_key_id,
-        aws_secret_access_key=settings.r2_secret_access_key,
-        config=Config(signature_version="s3v4"),
-        region_name="auto",
-    )
-    upload_url = s3.generate_presigned_url(
-        "put_object",
-        Params={"Bucket": settings.r2_bucket, "Key": blob_name, "ContentType": "image/jpeg"},
-        ExpiresIn=900,
-    )
-    public_url = f"{settings.r2_public_url}/{blob_name}"
-    return {"upload_url": upload_url, "photo_url": public_url}
+    contents = await file.read(settings.max_photo_bytes + 1)
+    if len(contents) > settings.max_photo_bytes:
+        raise HTTPException(status_code=413, detail="Photo exceeds 10 MB limit.")
+
+    user_dir = Path(settings.upload_dir) / user_id
+    user_dir.mkdir(parents=True, exist_ok=True)
+
+    filename = f"{uuid.uuid4()}.jpg"
+    (user_dir / filename).write_bytes(contents)
+
+    # Build absolute URL — Railway sets x-forwarded-proto for HTTPS
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    host = request.headers.get("host", str(request.url.hostname))
+    photo_url = f"{scheme}://{host}/photos/{user_id}/{filename}"
+
+    return {"photo_url": photo_url}

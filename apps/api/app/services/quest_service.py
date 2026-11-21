@@ -105,9 +105,10 @@ async def submit_quest(
         await db.flush()
         return "expired"
 
-    # photo_url must point to this user's own folder in our bucket, not an arbitrary URL
-    expected_prefix = f"{settings.r2_public_url}/photos/{user_id}/"
-    if not photo_url.startswith(expected_prefix) or not photo_url.endswith(".jpg"):
+    # photo_url must point to this user's own folder on our server, not an arbitrary URL
+    from urllib.parse import urlparse
+    parsed = urlparse(photo_url)
+    if not parsed.path.startswith(f"/photos/{user_id}/") or not photo_url.endswith(".jpg"):
         return "invalid_photo_url"
 
     # Verify the player is physically within quest_proximity_meters of the tree.

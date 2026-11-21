@@ -6,6 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.security import HTTPBearer
 from app.config import settings
+
+Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
 from app.routers import auth, quests, users, admin
 
 logger = logging.getLogger("alphahawk")
@@ -47,6 +49,16 @@ app.include_router(admin.router)
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/photos/{user_id}/{filename}", include_in_schema=False)
+async def serve_photo(user_id: str, filename: str):
+    if ".." in user_id or ".." in filename:
+        return JSONResponse(status_code=404, content={"detail": "Not found"})
+    file_path = Path(settings.upload_dir) / user_id / filename
+    if not file_path.is_file():
+        return JSONResponse(status_code=404, content={"detail": "Not found"})
+    return FileResponse(file_path, media_type="image/jpeg")
 
 
 @app.get("/{full_path:path}", include_in_schema=False)
