@@ -46,6 +46,11 @@ app.include_router(admin.router)
 
 
 
+@app.get("/")
+async def root():
+    return {"app": settings.app_name, "docs": "/docs", "status": "ok"}
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
