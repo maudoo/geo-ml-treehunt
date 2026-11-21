@@ -1,8 +1,9 @@
 import logging
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.security import HTTPBearer
 from app.config import settings
 from app.routers import auth, quests, users, admin
@@ -43,11 +44,19 @@ app.include_router(admin.router)
 
 
 
-@app.get("/")
-async def root():
-    return {"message": "Alphahawk API is running!"}
-
-
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/{full_path:path}", include_in_schema=False)
+async def serve_frontend(full_path: str):
+    # Serve the built Expo web app; fall back to index.html for SPA client-side routing.
+    static = Path("static")
+    file = static / full_path
+    if file.is_file():
+        return FileResponse(file)
+    index = static / "index.html"
+    if index.exists():
+        return FileResponse(index)
+    return JSONResponse(status_code=404, content={"detail": "Not found"})
