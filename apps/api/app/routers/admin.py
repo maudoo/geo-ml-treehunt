@@ -1,10 +1,15 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, status
+from pathlib import Path
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app.database import get_db
 from app.core.dependencies import get_admin
 from app.services.admin_service import get_completed_quests, set_user_active
+from app.models.quest import Quest
+from app.config import settings
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -91,3 +96,43 @@ async def unban_user(
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
     return "<script>window.location='/admin'</script>"
+
+
+@router.post("/migrate-photos")
+async def migrate_gcs_photos(
+    request: Request,
+    _: str = Depends(get_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    """One-time migration: download completed quest photos from GCS → Railway volume."""
+    result = await db.execute(
+        select(Quest).where(
+            Quest.status == "completed",
+            Quest.photo_url.like("https://storage.googleapis.com/%"),
+        )
+    )
+    quests = result.scalars().all()
+
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    host = request.headers.get("host", str(request.url.hostname))
+
+    migrated, failed = [], []
+
+    async with httpx.AsyncClient(timeout=30) as http:
+        for quest in quests:
+            try:
+                resp = await http.get(quest.photo_url)
+                if resp.status_code != 200:
+                    failed.append({"id": str(quest.id), "reason": f"GCS {resp.status_code}"})
+                    continue
+                user_dir = Path(settings.upload_dir) / str(quest.user_id)
+                user_dir.mkdir(parents=True, exist_ok=True)
+                filename = f"{quest.id}.jpg"
+                (user_dir / filename).write_bytes(resp.content)
+                quest.photo_url = f"{scheme}://{host}/photos/{quest.user_id}/{filename}"
+                migrated.append(str(quest.id))
+            except Exception as e:
+                failed.append({"id": str(quest.id), "reason": str(e)})
+
+    await db.commit()
+    return {"migrated": len(migrated), "failed": failed}
