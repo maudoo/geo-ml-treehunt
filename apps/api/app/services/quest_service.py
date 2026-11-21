@@ -112,24 +112,25 @@ async def submit_quest(
         return "invalid_photo_url"
 
     # Verify the player is physically within quest_proximity_meters of the tree.
-    proximity = await db.execute(
-        text("""
-            SELECT ST_DWithin(
-                location::geography,
-                ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
-                :radius
-            )
-            FROM trees WHERE id = :tree_id
-        """),
-        {
-            "lng": longitude,
-            "lat": latitude,
-            "radius": settings.quest_proximity_meters,
-            "tree_id": str(quest.tree_id),
-        },
-    )
-    if not proximity.scalar():
-        return "too_far"
+    if settings.quest_proximity_enabled:
+        proximity = await db.execute(
+            text("""
+                SELECT ST_DWithin(
+                    location::geography,
+                    ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+                    :radius
+                )
+                FROM trees WHERE id = :tree_id
+            """),
+            {
+                "lng": longitude,
+                "lat": latitude,
+                "radius": settings.quest_proximity_meters,
+                "tree_id": str(quest.tree_id),
+            },
+        )
+        if not proximity.scalar():
+            return "too_far"
 
     # Complete the quest
     quest.photo_url = photo_url

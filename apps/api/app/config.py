@@ -40,6 +40,7 @@ class Settings(BaseSettings):
 
     # Game
     points_per_quest: int = 100
+    quest_proximity_enabled: bool = True
     quest_proximity_meters: int = 20  # how close a user must be to a tree to complete its quest
 
 settings = Settings()
