@@ -30,8 +30,12 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
-    # Storage
-    gcs_bucket: str = "geo-ml-treehunt-photos"
+    # Storage (Cloudflare R2 — S3-compatible)
+    r2_account_id: str
+    r2_access_key_id: str
+    r2_secret_access_key: str
+    r2_bucket: str = "geo-ml-treehunt-photos"
+    r2_public_url: str  # e.g. https://pub-xxx.r2.dev (no trailing slash)
     max_photo_bytes: int = 10 * 1024 * 1024  # 10 MB cap on quest photo uploads
 
     # Admin panel

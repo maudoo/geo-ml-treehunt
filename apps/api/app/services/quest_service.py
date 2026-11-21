@@ -106,7 +106,7 @@ async def submit_quest(
         return "expired"
 
     # photo_url must point to this user's own folder in our bucket, not an arbitrary URL
-    expected_prefix = f"https://storage.googleapis.com/{settings.gcs_bucket}/photos/{user_id}/"
+    expected_prefix = f"{settings.r2_public_url}/photos/{user_id}/"
     if not photo_url.startswith(expected_prefix) or not photo_url.endswith(".jpg"):
         return "invalid_photo_url"
 

@@ -1,7 +1,8 @@
 import uuid
+import boto3
+from botocore.config import Config
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from google.cloud import storage
 from app.database import get_db
 from app.core.dependencies import get_current_user
 from app.schemas.quest import QuestDetail, QuestSubmission, LeaderboardPlayer
@@ -120,33 +121,20 @@ async def leaderboard(
 async def get_upload_url(
     user_id: str = Depends(get_current_user),
 ):
-    import google.auth
-    import google.auth.transport.requests
-    from datetime import timedelta
-
-    credentials, _ = google.auth.default()
-    credentials.refresh(google.auth.transport.requests.Request())
-
-    gcs = storage.Client(credentials=credentials)
     blob_name = f"photos/{user_id}/{uuid.uuid4()}.jpg"
-    bucket = gcs.bucket(settings.gcs_bucket)
-    blob = bucket.blob(blob_name)
 
-    # Bind a size range into the signature so GCS rejects oversized PUTs at the
-    # bucket. The client must send the matching x-goog-content-length-range header.
-    size_range = f"0,{settings.max_photo_bytes}"
-    signed_url = blob.generate_signed_url(
-        expiration=timedelta(minutes=15),
-        method="PUT",
-        content_type="image/jpeg",
-        version="v4",
-        headers={"x-goog-content-length-range": size_range},
-        service_account_email=credentials.service_account_email,
-        access_token=credentials.token,
+    s3 = boto3.client(
+        "s3",
+        endpoint_url=f"https://{settings.r2_account_id}.r2.cloudflarestorage.com",
+        aws_access_key_id=settings.r2_access_key_id,
+        aws_secret_access_key=settings.r2_secret_access_key,
+        config=Config(signature_version="s3v4"),
+        region_name="auto",
     )
-    public_url = f"https://storage.googleapis.com/{settings.gcs_bucket}/{blob_name}"
-    return {
-        "upload_url": signed_url,
-        "photo_url": public_url,
-        "required_headers": {"x-goog-content-length-range": size_range},
-    }
+    upload_url = s3.generate_presigned_url(
+        "put_object",
+        Params={"Bucket": settings.r2_bucket, "Key": blob_name, "ContentType": "image/jpeg"},
+        ExpiresIn=900,
+    )
+    public_url = f"{settings.r2_public_url}/{blob_name}"
+    return {"upload_url": upload_url, "photo_url": public_url}
