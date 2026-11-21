@@ -23,9 +23,10 @@ async def admin_panel(
 
     rows = ""
     for q in quests:
-        rows += f"""
+        photo_cell = f'<img src="{q.photo_url}" width="120" style="border-radius:6px">' if q.photo_url else '<span style="color:#aaa;font-size:12px">No photo</span>'
+    rows += f"""
         <tr>
-            <td><img src="{q.photo_url}" width="120" style="border-radius:6px"></td>
+            <td>{photo_cell}</td>
             <td>
                 <strong>{q.tree.common_name}</strong><br>
                 <small><em>{q.tree.scientific_name}</em></small>

@@ -38,8 +38,8 @@ export default function QuestDetailScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md }]}>
       <View style={styles.statusRow}>
-        <View style={[styles.badge, quest.status === 'active' ? styles.badgeActive : styles.badgeDone]}>
-          <Text style={styles.badgeText}>{quest.status === 'active' ? 'Active' : 'Completed'}</Text>
+        <View style={[styles.badge, badgeStyle(quest.status)]}>
+          <Text style={styles.badgeText}>{badgeLabel(quest.status)}</Text>
         </View>
         {quest.status === 'completed' && (
           <Text style={styles.xp}>+{quest.points_awarded} XP</Text>
@@ -81,6 +81,20 @@ export default function QuestDetailScreen() {
   );
 }
 
+function badgeLabel(status: string) {
+  if (status === 'active') return 'Active';
+  if (status === 'expired') return 'Expired';
+  if (status === 'cancelled') return 'Cancelled';
+  return 'Completed';
+}
+
+function badgeStyle(status: string) {
+  if (status === 'active') return styles.badgeActive;
+  if (status === 'expired') return styles.badgeExpired;
+  if (status === 'cancelled') return styles.badgeCancelled;
+  return styles.badgeDone;
+}
+
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.row}>
@@ -119,12 +133,10 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 20,
   },
-  badgeActive: {
-    backgroundColor: colors.primary,
-  },
-  badgeDone: {
-    backgroundColor: colors.disabled,
-  },
+  badgeActive: { backgroundColor: colors.primary },
+  badgeDone: { backgroundColor: colors.disabled },
+  badgeExpired: { backgroundColor: colors.warning },
+  badgeCancelled: { backgroundColor: colors.disabled },
   badgeText: {
     color: 'white',
     fontSize: 12,
