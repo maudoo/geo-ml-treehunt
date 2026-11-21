@@ -2,7 +2,7 @@ import axios from 'axios';
 import { router } from 'expo-router';
 import { getToken } from '../lib/storage';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://geo-ml-treehunt-api-858416453237.us-east1.run.app';
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://alphahawk-adventure.up.railway.app';
 const client = axios.create({
   baseURL: API_URL,
   headers: {
